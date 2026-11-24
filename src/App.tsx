@@ -44,10 +44,10 @@ export default function App() {
       URL.revokeObjectURL(resultVideoUrl);
       setResultVideoUrl(null);
     }
-    setGenerationStep('جاري الاتصال بخوادم Hugging Face وتوليد الفيديو الحقيقي...');
+    setGenerationStep('جاري الاتصال بدالة Netlify السحابية وتوليد الفيديو...');
 
     try {
-      const res = await fetch('/api/generate-video', {
+      const res = await fetch('/.netlify/functions/generate-video', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -57,8 +57,8 @@ export default function App() {
       });
 
       if (!res.ok) {
-        const errData = await res.json();
-        throw new Error(errData.error || 'فشل توليد الفيديو من الخادم');
+        const errData = await res.json().catch(() => ({ error: 'فشل الاتصال بالدالة السحابية' }));
+        throw new Error(errData.error || 'فشل توليد الفيديو');
       }
 
       const videoBlob = await res.blob();
@@ -85,8 +85,8 @@ export default function App() {
             <Video className="w-5 h-5 text-white" />
           </div>
           <div>
-            <h1 className="font-bold text-base leading-tight">مولد فيديوهات Hugging Face</h1>
-            <p className="text-xs text-slate-400">Text-to-Video AI Generator</p>
+            <h1 className="font-bold text-base leading-tight">مولد فيديوهات Netlify AI</h1>
+            <p className="text-xs text-slate-400">Text-to-Video Serverless Function</p>
           </div>
         </div>
 
@@ -154,7 +154,7 @@ export default function App() {
           <div className="text-center space-y-1">
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 text-xs font-semibold mb-1">
               <Sparkles className="w-3.5 h-3.5" />
-              <span>توليد فيديو حقيقي عبر Hugging Face API</span>
+              <span>توليد فيديو عبر دالة Netlify السحابية</span>
             </div>
             <h2 className="text-xl font-bold">ما هو المشهد الذي تريد توليده؟</h2>
             <p className="text-xs text-slate-400">اكتب وصفاً باللغة العربية أو الإنجليزية وسيقوم الخادم بتوليد ملف فيديو MP4</p>
@@ -222,12 +222,12 @@ export default function App() {
               {isGenerating ? (
                 <>
                   <RefreshCw className="w-5 h-5 animate-spin" />
-                  <span>جاري توليد الفيديو عبر الخادم...</span>
+                  <span>جاري معالجة الفيديو بالدالة السحابية...</span>
                 </>
               ) : (
                 <>
                   <Sparkles className="w-5 h-5" />
-                  <span>توليد الفيديو (Hugging Face API)</span>
+                  <span>توليد الفيديو (Netlify Function)</span>
                 </>
               )}
             </button>

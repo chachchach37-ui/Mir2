@@ -3,7 +3,7 @@ import { createServer as createViteServer } from 'vite';
 import path from 'path';
 import dotenv from 'dotenv';
 import { fileURLToPath } from 'url';
-import generateVideoHandler from './api/generate-video.js';
+import { handler as netlifyHandler } from './netlify/functions/generate-video.js';
 
 dotenv.config();
 
@@ -14,8 +14,33 @@ async function startServer() {
   const app = express();
   app.use(express.json());
 
-  // Mount serverless handler on /api/generate-video
-  app.post('/api/generate-video', generateVideoHandler);
+  // Bridge Netlify function handler to Express route for local dev
+  const bridgeHandler = async (req: any, res: any) => {
+    try {
+      const netlifyEvent = {
+        httpMethod: req.method,
+        body: JSON.stringify(req.body)
+      };
+      const result = await netlifyHandler(netlifyEvent as any);
+      res.status(result.statusCode);
+      if (result.headers) {
+        for (const [key, val] of Object.entries(result.headers)) {
+          res.setHeader(key, val as string);
+        }
+      }
+      if (result.isBase64Encoded) {
+        const buffer = Buffer.from(result.body, 'base64');
+        res.send(buffer);
+      } else {
+        res.send(result.body);
+      }
+    } catch (err: any) {
+      res.status(500).json({ error: err.message || 'Internal error' });
+    }
+  };
+
+  app.post('/.netlify/functions/generate-video', bridgeHandler);
+  app.post('/api/generate-video', bridgeHandler);
 
   if (process.env.NODE_ENV !== 'production') {
     const vite = await createViteServer({
