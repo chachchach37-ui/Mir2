@@ -15,13 +15,7 @@ jobs:
       - run: npm install --legacy-peer-deps
       - run: npm run build
       - name: Deploy to Netlify
-        uses: nwtgck/actions-netlify@v3.0
-        with:
-          publish-dir: './dist'
-          functions-dir: './netlify/functions'
-          production-branch: main
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          deploy-message: "Deploy Mir2 from GitHub Actions"
+        run: npx netlify-cli deploy --prod --dir=./dist --functions=./netlify/functions
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
           NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
