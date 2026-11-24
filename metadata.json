@@ -1,0 +1,6 @@
+{
+  "name": "صانع الفيديوهات الذكي - AI Video Studio Pro",
+  "description": "توليد فيديوهات احترافية بمقاس 9:16 عبر الذكاء الاصطناعي مع تعليق صوتي وتصدير مباشر للهاتف",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
